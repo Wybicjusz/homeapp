@@ -47,33 +47,47 @@ class _WeatherForecastScreenState extends State<WeatherForecastScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Sekcja szczegółowa
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'Szczegółowa prognoza (co 1 godzina):',
+                    'Pogoda dzisiaj',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: detailedForecast.length,
-                  itemBuilder: (context, index) {
-                    final item = detailedForecast[index];
-                    return ListTile(
-                      leading: Image.network(
-                        'https://openweathermap.org/img/wn/${item['icon']}@2x.png',
-                      ),
-                      title: Text('${item['time']}'),
-                      subtitle: Text(
-                          'Temperatura: ${item['temperature']}°C\nWilgotność: ${item['humidity']}%\nPogoda: ${item['weather']}'),
-                    );
-                  },
+                SizedBox(
+                  height: 120,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: detailedForecast.length,
+                    itemBuilder: (context, index) {
+                      final item = detailedForecast[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              item['time'],
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            Image.network(
+                              'https://openweathermap.org/img/wn/${item['icon']}@2x.png',
+                              width: 50,
+                              height: 50,
+                            ),
+                            const SizedBox(height: 5),
+                            Text('${item['temperature']}°C'),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
+                // Sekcja kilkudniowa
                 const Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Text(
-                    'Prognoza na kilka dni:',
+                    'Pogoda kilkudniowa',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -89,7 +103,7 @@ class _WeatherForecastScreenState extends State<WeatherForecastScreen> {
                       ),
                       title: Text('${item['time']}'),
                       subtitle: Text(
-                          'Min: ${item['min_temp']}°C, Max: ${item['max_temp']}°C\nPogoda: ${item['weather']}'),
+                          'Min: ${item['min_temp']}°C, Max: ${item['max_temp']}°C\nPogoda: ${item['weather']}\nSzansa na opady: ${item['pop']}%'),
                     );
                   },
                 ),
