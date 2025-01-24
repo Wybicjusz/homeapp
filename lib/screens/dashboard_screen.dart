@@ -26,14 +26,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> connectToMQTT() async {
     try {
-      // Połączenie z brokerem HiveMQ
       await mqttService.connect();
       mqttService.subscribe('home/temperature');
 
-      // Nasłuchiwanie wiadomości
       mqttService.listenToMessages((topic, payload) {
         setState(() {
-          receivedMessage = payload; // Aktualizacja wiadomości w stanie
+          receivedMessage = payload;
         });
       });
     } catch (e) {
@@ -61,10 +59,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.deepPurple,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Dashboard'),
+            const Text('Dashboard', style: TextStyle(color: Colors.white)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -73,14 +72,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Row(
                       children: [
                         const Icon(Icons.thermostat, color: Colors.red),
-                        Text(temperature),
+                        Text(temperature,
+                            style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                     const SizedBox(width: 10),
                     Row(
                       children: [
                         const Icon(Icons.water_drop, color: Colors.blue),
-                        Text(humidity),
+                        Text(humidity,
+                            style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                   ],
@@ -91,14 +92,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              const WeatherForecastScreen()), // Ekran prognozy
+                        builder: (context) => const WeatherForecastScreen(),
+                      ),
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     'Prognoza',
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: Colors.white,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -108,69 +109,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      body: Container(
-        color: const Color.fromARGB(255, 224, 216, 216),
-        child: GridView.count(
-          crossAxisCount: 2,
-          children: [
-            // Kafelek termometru
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ThermostatScreen(),
+      body: Stack(
+        children: [
+          Container(
+            color: Colors.deepPurple[50],
+            child: GridView.count(
+              crossAxisCount: 2,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ThermostatScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.purple[100],
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.thermostat, size: 48, color: Colors.purple),
+                        SizedBox(height: 8),
+                        Text(
+                          "Termostat",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple),
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              },
-              child: Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.blue[100],
-                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.thermostat, size: 48, color: Colors.blue),
-                    SizedBox(height: 8),
-                    Text(
-                      "Termostat",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                GestureDetector(
+                  onTap: () {
+                    print("Dodaj nowe urządzenie!");
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                print("Dodaj nowe urządzenie!");
-              },
-              child: Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.green[100],
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.add, size: 48, color: Colors.green),
-                    SizedBox(height: 8),
-                    Text(
-                      "Dodaj nowe",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.add, size: 48, color: Colors.orange),
+                        SizedBox(height: 8),
+                        Text(
+                          "Nowe urządzenie",
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton(
+              onPressed: () {
+                mqttService.disconnect();
+                Navigator.pushReplacementNamed(
+                    context, '/login'); // Powrót do ekranu logowania
+              },
+              backgroundColor: Colors.red,
+              child: const Icon(Icons.logout, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
