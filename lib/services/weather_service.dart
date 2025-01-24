@@ -28,7 +28,7 @@ class WeatherService {
     }
   }
 
-  // Pobierz prognozę na 5 dni (co 3 godziny)
+  // Pobierz prognozę szczegółową i kilkudniową
   Future<Map<String, List<Map<String, dynamic>>>>
       fetchDetailedAndDailyForecast({
     double? lat,
@@ -42,46 +42,60 @@ class WeatherService {
 
     final response = await http.get(url);
 
+    print('Request URL: $url');
+    print('Response status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
       // Szczegółowa prognoza godzinowa
-      final List hourlyForecast = data['hourly'];
+      final List hourlyForecast = data['hourly'] ?? [];
       final List<Map<String, dynamic>> detailedForecast =
           hourlyForecast.map((item) {
+        final time = DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000);
         return {
           'time':
-              DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000).toString(),
-          'temperature': item['temp'],
+              '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}', // Format HH:mm
+          'temperature': item['temp'].round(), // Zaokrąglenie temperatury
           'humidity': item['humidity'],
+          'precipitation_chance':
+              ((item['pop'] ?? 0) * 100).round(), // Szansa na opady w %
           'weather': item['weather'][0]['description'],
           'icon': item['weather'][0]['icon'],
         };
       }).toList();
+
+      print('Detailed forecast data: $detailedForecast');
 
       // Prognoza dzienna
       final List dailyForecast = data['daily'];
       final List<Map<String, dynamic>> dailyForecastData =
           dailyForecast.map((item) {
         return {
-          'time':
-              DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000).toString(),
+          'time': DateTime.fromMillisecondsSinceEpoch(item['dt'] * 1000)
+              .toLocal()
+              .toString()
+              .split(' ')[0], // Data w formacie YYYY-MM-DD
           'temperature': {
-            'day': item['temp']['day'],
-            'min': item['temp']['min'],
-            'max': item['temp']['max'],
+            'min': item['temp']['min'].round(),
+            'max': item['temp']['max'].round(),
           },
-          'humidity': item['humidity'],
+          'precipitation':
+              ((item['pop'] ?? 0) * 100).round(), // Szansa na opady w %
           'weather': item['weather'][0]['description'],
           'icon': item['weather'][0]['icon'],
         };
       }).toList();
+
+      print('Daily forecast data: $dailyForecastData');
 
       return {
         'detailed': detailedForecast,
         'daily': dailyForecastData,
       };
     } else {
+      print('API Error: ${response.statusCode}, Body: ${response.body}');
       throw Exception('Failed to load forecast data');
     }
   }
