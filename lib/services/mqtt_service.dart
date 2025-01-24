@@ -27,18 +27,34 @@ class MQTTService {
 
     try {
       await client.connect();
+      if (client.connectionStatus?.state != MqttConnectionState.connected) {
+        throw Exception('Connection failed');
+      }
     } catch (e) {
       print('Connection error: $e');
       client.disconnect();
+      rethrow; // Rzuć błąd dalej
     }
   }
 
+  bool isClientConnected() {
+    return client.connectionStatus?.state == MqttConnectionState.connected;
+  }
+
   void subscribe(String topic) {
+    if (!isClientConnected()) {
+      print('Client is not connected. Cannot subscribe.');
+      return;
+    }
     client.subscribe(topic, MqttQos.atLeastOnce);
     print('Subscribed to topic: $topic');
   }
 
   void publish(String topic, String message) {
+    if (!isClientConnected()) {
+      print('Client is not connected. Cannot publish.');
+      return;
+    }
     final builder = MqttClientPayloadBuilder();
     builder.addString(message);
     client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
@@ -46,6 +62,10 @@ class MQTTService {
   }
 
   void listenToMessages(Function(String topic, String payload) onMessage) {
+    if (!isClientConnected()) {
+      print('Client is not connected. Cannot listen for messages.');
+      return;
+    }
     client.updates!.listen((List<MqttReceivedMessage<MqttMessage>> messages) {
       final MqttPublishMessage message =
           messages[0].payload as MqttPublishMessage;
@@ -55,7 +75,6 @@ class MQTTService {
       final topic = messages[0].topic;
       print('Received message: "$payload" from topic: "$topic"');
 
-      // Wywołanie funkcji przekazanej przez użytkownika
       onMessage(topic, payload);
     });
   }

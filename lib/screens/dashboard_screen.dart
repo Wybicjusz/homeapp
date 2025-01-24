@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:homeapp/services/mqtt_service.dart';
 import 'package:homeapp/services/weather_service.dart';
 import 'package:homeapp/screens/forecast_screen.dart';
-import 'package:homeapp/screens/login_screen.dart'; // Dodano import ekranu logowania
+import 'package:homeapp/screens/thermostat_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -64,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Dashboard'), // Napis "Dashboard" po lewej stronie
+            const Text('Dashboard'),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -91,7 +91,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const WeatherForecastScreen()),
+                          builder: (context) =>
+                              const WeatherForecastScreen()), // Ekran prognozy
                     );
                   },
                   child: Text(
@@ -109,49 +110,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: Container(
         color: const Color.fromARGB(255, 224, 216, 216),
-        child: Stack(
+        child: GridView.count(
+          crossAxisCount: 2,
           children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Konsola:',
-                    style: Theme.of(context).textTheme.headlineSmall,
+            // Kafelek termometru
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ThermostatScreen(),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    receivedMessage,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      mqttService.publish('home/temperature', '25');
-                    },
-                    child: const Text('Wyślij temperaturę: 25°C'),
-                  ),
-                ],
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.thermostat, size: 48, color: Colors.blue),
+                    SizedBox(height: 8),
+                    Text(
+                      "Termostat",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: ElevatedButton(
-                onPressed: () {
-                  mqttService.disconnect(); // Odłączenie MQTT
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, // Kolor przycisku
+            GestureDetector(
+              onTap: () {
+                print("Dodaj nowe urządzenie!");
+              },
+              child: Container(
+                margin: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.green[100],
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                child: const Text(
-                  'Wyloguj',
-                  style: TextStyle(color: Colors.white),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.add, size: 48, color: Colors.green),
+                    SizedBox(height: 8),
+                    Text(
+                      "Dodaj nowe",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
             ),
