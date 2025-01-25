@@ -59,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
-                const Spacer(), // Odstęp między nagłówkiem a formularzem
+                const Spacer(),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -78,27 +78,56 @@ class LoginScreen extends StatelessWidget {
                         obscureText: true,
                       ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(
-                                LoginRequested(
-                                  emailController.text,
-                                  passwordController.text,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.read<AuthBloc>().add(
+                                      LoginRequested(
+                                        emailController.text,
+                                        passwordController.text,
+                                      ),
+                                    );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF9C27B0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF9C27B0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 20),
+                              ),
+                              child: const Text(
+                                'Zaloguj się',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 20),
-                        ),
-                        child: const Text(
-                          'Zaloguj się',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                print("Przycisk rejestracji");
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 20),
+                              ),
+                              child: const Text(
+                                'Rejestracja',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
